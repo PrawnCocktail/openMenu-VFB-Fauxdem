@@ -29,6 +29,7 @@
 #include <backend/db_list.h>
 #include <backend/dcnow_net.h>
 #include <backend/dcnow_vmu.h>
+#include <backend/fauxdem_time.h>
 #include <backend/gd_list.h>
 #include <backend/online_time_sync.h>
 #include <openmenu_debug.h>
@@ -766,6 +767,7 @@ main(int argc, char* argv[]) {
         dcnow_conn_tick();
         dcnow_vmu_tick();
         online_time_sync_tick();
+        fauxdem_time_tick();
         bgm_poll();
         vid_waitvbl();
         if (need_reload_ui) {
