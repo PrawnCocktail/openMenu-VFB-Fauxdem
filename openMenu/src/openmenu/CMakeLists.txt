@@ -16,6 +16,8 @@ set(OPENMENU_SOURCES
         src/backend/dcnow_net.c
         src/backend/dcnow_fetch.c
         src/backend/dcnow_vmu.c
+        src/backend/fauxdem_bus.c
+        src/backend/fauxdem_players.c
         src/backend/fauxdem_time.c
         src/backend/online_time_sync.c
         src/backend/gdemu_control.c
@@ -43,6 +45,7 @@ set(OPENMENU_SOURCES
         src/ui/ui_menu_credits.c
         src/ui/ui_scroll.c
         src/ui/ui_folders.c
+        src/ui/ui_fauxdem_players.c
         src/ui/ui_dcnow.c
         src/vm2/vm2_api.c
 )

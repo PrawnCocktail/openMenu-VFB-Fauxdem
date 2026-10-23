@@ -26,6 +26,7 @@
 #include "ui/font_prototypes.h"
 #include "ui/ui_common.h"
 #include "ui/ui_dcnow.h"
+#include "ui/ui_fauxdem_players.h"
 #include "ui/ui_menu_credits.h"
 
 #include "ui/ui_line_desc.h"
@@ -1028,6 +1029,8 @@ FUNCTION(UI_NAME, drawTR) {
                         region_themes[region_current].colors.menu_highlight_color);
     draw_device_warnings(&region_themes[region_current].colors,
                          region_themes[region_current].colors.menu_highlight_color, UI_LINE_DESC);
+    draw_fauxdem_players_overlay(&region_themes[region_current].colors,
+                                 region_themes[region_current].colors.menu_highlight_color, UI_LINE_DESC);
 #if DEBUG_VMU_SYNC
     draw_vmu_sync_debug(&region_themes[region_current].colors);
 #endif

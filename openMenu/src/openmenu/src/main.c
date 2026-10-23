@@ -29,6 +29,7 @@
 #include <backend/db_list.h>
 #include <backend/dcnow_net.h>
 #include <backend/dcnow_vmu.h>
+#include <backend/fauxdem_players.h>
 #include <backend/fauxdem_time.h>
 #include <backend/gd_list.h>
 #include <backend/online_time_sync.h>
@@ -44,6 +45,7 @@
 #include "ui/draw_prototypes.h"
 #include "ui/menu_mouse.h"
 #include "ui/ui_common.h"
+#include "ui/ui_fauxdem_players.h"
 #include "ui/ui_menu_credits.h"
 #include "vm2/vm2_api.h"
 #include "vmu_lcd_utils.h"
@@ -754,7 +756,7 @@ main(int argc, char* argv[]) {
     dcnow_net_set_hangup_hook(show_hangup);
     for (;;) {
         z_reset();
-        enum control input = translate_input();
+        enum control input = fauxdem_players_input(translate_input());
 #if DEBUG_VMU_SYNC
         if (!handle_input_vmu_sync_debug(input))
 #endif
@@ -768,6 +770,7 @@ main(int argc, char* argv[]) {
         dcnow_vmu_tick();
         online_time_sync_tick();
         fauxdem_time_tick();
+        fauxdem_players_tick();
         bgm_poll();
         vid_waitvbl();
         if (need_reload_ui) {

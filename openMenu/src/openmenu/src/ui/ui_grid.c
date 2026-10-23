@@ -24,6 +24,7 @@
 #include "ui/font_prototypes.h"
 #include "ui/ui_common.h"
 #include "ui/ui_dcnow.h"
+#include "ui/ui_fauxdem_players.h"
 #include "ui/ui_menu_credits.h"
 
 #include "ui/ui_grid.h"
@@ -1044,6 +1045,7 @@ FUNCTION(UI_NAME, drawTR) {
     }
     draw_hangup_overlay(current_theme_colors, current_theme_colors->menu_highlight_color);
     draw_device_warnings(current_theme_colors, current_theme_colors->menu_highlight_color, UI_GRID3);
+    draw_fauxdem_players_overlay(current_theme_colors, current_theme_colors->menu_highlight_color, UI_GRID3);
 #if DEBUG_VMU_SYNC
     draw_vmu_sync_debug(current_theme_colors);
 #endif

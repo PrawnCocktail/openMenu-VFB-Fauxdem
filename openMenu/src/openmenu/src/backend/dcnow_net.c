@@ -1,6 +1,5 @@
 /*
  * File: dcnow_net.c
- * Project: openmenu
  * Dreamcast Now! networking: expansion device detection and ISP settings.
  */
 
@@ -27,6 +26,7 @@
 #include "backend/dcnow_fetch.h"
 #include "backend/dcnow_net.h"
 #include "backend/dcnow_vmu.h"
+#include "backend/fauxdem_players.h"
 #include "backend/fauxdem_time.h"
 #include "backend/online_time_sync.h"
 
@@ -43,6 +43,7 @@ static dcnow_device_t device_found = DCNOW_DEV_NONE;
 dcnow_device_t
 dcnow_detect_device(void) {
     fauxdem_time_abort();
+    fauxdem_players_abort();
     mutex_lock(&probe_mutex);
     if (!device_probed) {
         device_probed = 1;
@@ -1007,6 +1008,7 @@ dcnow_net_shutdown(void) {
     /* A lost-link job joins the fetch and the time sync itself. */
     finish_worker();
     fauxdem_time_abort();
+    fauxdem_players_abort();
     online_time_sync_abort();
     dcnow_fetch_abort();
     dcnow_conn_poll(&snap);

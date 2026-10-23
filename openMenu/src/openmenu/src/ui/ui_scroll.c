@@ -24,6 +24,7 @@
 #include "ui/font_prototypes.h"
 #include "ui/ui_common.h"
 #include "ui/ui_dcnow.h"
+#include "ui/ui_fauxdem_players.h"
 #include "ui/ui_menu_credits.h"
 
 #include "ui/marquee.h"
@@ -884,6 +885,7 @@ FUNCTION(UI_NAME, drawTR) {
     }
     draw_hangup_overlay(&cur_theme->colors, cur_theme->colors.text_color);
     draw_device_warnings(&cur_theme->colors, cur_theme->colors.text_color, UI_SCROLL);
+    draw_fauxdem_players_overlay(&cur_theme->colors, cur_theme->colors.text_color, UI_SCROLL);
 #if DEBUG_VMU_SYNC
     draw_vmu_sync_debug(&cur_theme->colors);
 #endif

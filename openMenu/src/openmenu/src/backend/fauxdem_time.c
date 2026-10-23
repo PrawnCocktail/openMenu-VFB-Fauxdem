@@ -1,6 +1,7 @@
 /*
  * File: fauxdem_time.c
- * Fauxdem Time Sync: sets the console clock from the Fauxdem
+ * Fauxdem Time Sync: sets the console clock from the time a Fauxdem in the
+ * modem port gets over NTP, without dialing.
  *
  * The console writes the knock "FXTIME" to modem register 0x02. A Fauxdem
  * then shows its answer until the release write (0x00 to 0x02), a modem
@@ -23,6 +24,7 @@
 #include <openmenu_savefile.h>
 #include <openmenu_settings.h>
 
+#include "backend/fauxdem_bus.h"
 #include "backend/fauxdem_time.h"
 
 #define MODEM_REG(r) (0xa0600400 + ((r) << 2))
@@ -42,19 +44,19 @@
 #define STATUS_SYNCED  1
 
 #define SIG_WAIT_MS    500
-#define FIND_TRIES     5
+#define FIND_TRIES     5 /* The Fauxdem powers up with the console and can miss the first knocks. */
 #define FIND_GAP_MS    1000
 #define POLL_MS        1000
-#define SYNC_WAIT_MS   30000
+#define SYNC_WAIT_MS   45000 /* Ethernet link, DHCP, DNS and NTP after a cold start. */
 #define SLEEP_STEP_MS  50
-#define UTC_FLOOR      1767225600 /* 2026-01-01.*/
+#define UTC_FLOOR      1767225600 /* 2026-01-01. Anything earlier is not a real time. */
 
 typedef enum sync_state { SYNC_IDLE = 0, SYNC_RUNNING, SYNC_DONE, SYNC_FAILED } sync_state_t;
 
 static mutex_t sync_mutex = MUTEX_INITIALIZER;
-static sync_state_t sync_state = SYNC_IDLE; 
-static time_t sync_utc = 0;                 
-static kthread_t* sync_thread = NULL;       
+static sync_state_t sync_state = SYNC_IDLE;
+static time_t sync_utc = 0;                
+static kthread_t* sync_thread = NULL;      
 static volatile int abort_requested = 0;
 static int started = 0; /* one lookup per boot */
 
@@ -81,12 +83,14 @@ signed_on(void) {
 static void
 release(void) {
     g2_write_8(MODEM_REG(REG_KNOCK), RELEASE);
+    fauxdem_bus_unlock();
 }
 
 static int
 knock(void) {
     uint64_t deadline;
 
+    fauxdem_bus_lock();
     for (const char* p = KNOCK; *p; p++) {
         g2_write_8(MODEM_REG(REG_KNOCK), (uint8_t)*p);
     }
@@ -101,6 +105,7 @@ knock(void) {
         }
         thd_sleep(10);
     }
+    fauxdem_bus_unlock();
     return 0;
 }
 
@@ -117,6 +122,7 @@ crc8(const uint8_t* p, int n) {
     return crc;
 }
 
+/* out: version, status, UTC bytes. Returns 1 if they check out. */
 static int
 read_answer(uint8_t out[6]) {
     static const uint8_t regs[6] = {REG_VERSION, REG_STATUS, REG_UTC, REG_UTC + 1, REG_UTC + 2, REG_UTC + 3};
@@ -126,6 +132,8 @@ read_answer(uint8_t out[6]) {
         out[i] = g2_read_8(MODEM_REG(regs[i]));
     }
     check = g2_read_8(MODEM_REG(REG_CHECK));
+    /* The signature still up afterwards means the registers were not put
+     * back part way through. */
     return crc8(out, 6) == check && signed_on();
 }
 
@@ -197,7 +205,7 @@ fauxdem_time_tick(void) {
         if (setting == ONLINE_TIME_SYNC_OFF) {
             return;
         }
-        
+        /* Held across the create so an abort cannot miss the pointer. */
         mutex_lock(&sync_mutex);
         sync_thread = thd_create(false, sync_main, NULL);
         sync_state = sync_thread != NULL ? SYNC_RUNNING : SYNC_IDLE;

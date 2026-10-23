@@ -34,6 +34,7 @@
 #include "ui/theme_manager.h"
 #include "ui/ui_common.h"
 #include "ui/ui_dcnow.h"
+#include "ui/ui_fauxdem_players.h"
 #include "ui/ui_menu_credits.h"
 
 #include "ui/ui_folders.h"
@@ -1430,6 +1431,7 @@ FUNCTION(UI_NAME, drawTR) {
     }
     draw_hangup_overlay(&cur_theme->colors, cur_theme->menu_title_color);
     draw_device_warnings(&cur_theme->colors, cur_theme->menu_title_color, UI_FOLDERS);
+    draw_fauxdem_players_overlay(&cur_theme->colors, cur_theme->menu_title_color, UI_FOLDERS);
 #if DEBUG_VMU_SYNC
     draw_vmu_sync_debug(&cur_theme->colors);
 #endif
